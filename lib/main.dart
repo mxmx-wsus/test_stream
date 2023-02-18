@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:async';
 
 void main() {
   runApp(const MyApp());
@@ -32,11 +33,28 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
 
+  // StreamControllerで_counterStreamという川を作る。
+  final _counterStream = StreamController<int>();
+
+  @override
+  void initState(){
+    super.initState();
+    Consumer(_counterStream);
+  }
+
+  @override
+  void dispose(){
+    super.dispose();
+    _counterStream.close();
+  }
+
   void _incrementCounter() {
     setState(() {
       _counter++;
     });
+    _counterStream.sink.add(_counter);
   }
+  
 
   @override
   Widget build(BuildContext context) {
@@ -64,5 +82,14 @@ class _MyHomePageState extends State<MyHomePage> {
         child: const Icon(Icons.add),
       ), // This trailing comma makes auto-formatting nicer for build methods.
     );
+  }
+}
+
+// Consumer(最終使用者)というストリームを監視する人を作る。
+class Consumer {
+  Consumer(StreamController<int>consumeStream) {
+    consumeStream.stream.listen((data) async{
+      print("consumerが$dataを使ったよ！");
+     });
   }
 }
